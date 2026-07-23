@@ -1,2 +1,2 @@
 # python_brainmap
-I have finished a course covering python briefly on Kaggle
+I have finished a course covering python briefly on Kaggle and i have figures that a brain map would be cool , so i told claude what i needed then it made this. I am sorry that i didnt build it myself but i dont know css and java scrpit yet.

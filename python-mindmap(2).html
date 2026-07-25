@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Programming for Data Science — Zihin Haritası</title>
+<style>
+  :root{
+    --bg-0:#f6f4ee;
+    --bg-1:#eeeade;
+    --paper:#fbfaf6;
+    --ink:#2c3a3a;
+    --ink-soft:#5c6b6b;
+    --root:#3d4f63;
+    --branch:#2d4a45;
+    --leaf:#3a5a54;
+    --line:#9db3ad;
+    --line-root:#aab9cf;
+    --accent:#c98a5e;
+    --accent-soft:#e7c9ad;
+    --leaf-text:#f3efe6;
+    --shadow: 0 1px 2px rgba(30,40,40,.06), 0 6px 18px rgba(30,40,40,.07);
+    --shadow-hover: 0 2px 4px rgba(30,40,40,.10), 0 14px 30px rgba(30,40,40,.14);
+    --serif: 'Iowan Old Style','Palatino Linotype','Book Antiqua', Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background:
+      radial-gradient(1200px 700px at 8% -5%, #fbfaf5 0%, transparent 60%),
+      radial-gradient(1000px 800px at 95% 10%, #f1ede2 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1));
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* subtle drifting texture, purely ambient */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    opacity:.5;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(60,80,75,.06) 0, transparent 60%),
+      radial-gradient(1px 1px at 70% 65%, rgba(60,80,75,.05) 0, transparent 60%),
+      radial-gradient(1px 1px at 45% 80%, rgba(60,80,75,.05) 0, transparent 60%);
+    background-size: 600px 600px, 700px 700px, 500px 500px;
+  }
+
+  header{
+    position: relative;
+    z-index: 2;
+    padding: 48px 6vw 20px;
+    text-align:left;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-text{ flex: 1 1 420px; min-width: 0; }
+
+  .lang-switch{
+    display:inline-flex;
+    align-items:center;
+    background: var(--paper);
+    border: 1px solid rgba(60,80,75,.16);
+    border-radius: 999px;
+    padding: 4px;
+    box-shadow: var(--shadow);
+    flex: none;
+    margin-top: 4px;
+  }
+  .lang-switch button{
+    appearance:none;
+    border:none;
+    background: transparent;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+    padding: 7px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .lang-switch button.active{
+    background: linear-gradient(155deg, #46586e, #34435a);
+    color: #f4f2ea;
+    box-shadow: 0 2px 8px rgba(30,40,40,.18);
+  }
+  .lang-switch button:not(.active):hover{
+    color: var(--branch);
+    background: rgba(45,74,69,.06);
+  }
+  .lang-switch button:focus-visible{
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(201,138,94,.4);
+  }
+
+  .eyebrow{
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+
+  h1{
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(26px, 3.4vw, 42px);
+    margin: 0 0 8px;
+    color: var(--ink);
+    letter-spacing: .2px;
+  }
+
+  .subtitle{
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    max-width: 640px;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .subtitle kbd{
+    font-family: var(--sans);
+    background: var(--paper);
+    border: 1px solid rgba(60,80,75,.18);
+    border-bottom-width: 2px;
+    padding: 1px 7px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    color: var(--branch);
+  }
+
+  @media (max-width: 640px){
+    header{ flex-direction: column; }
+    .lang-switch{ margin-top: 0; }
+  }
+
+  #stage-wrap{
+    position:relative;
+    z-index: 1;
+    width: 100%;
+    padding: 10px 0 90px;
+  }
+
+  #canvas-scroll{
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  svg#lines{
+    position:absolute;
+    top:0; left:0;
+    overflow: visible;
+    pointer-events:none;
+    z-index: 0;
+  }
+
+  .link{
+    fill:none;
+    stroke: var(--line);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    opacity:.75;
+    transition: stroke .25s ease, opacity .25s ease, stroke-width .25s ease;
+  }
+  .link.root-link{ stroke: var(--line-root); stroke-width: 1.8; }
+  .link.dim{ opacity:.16; }
+  .link.lit{ stroke: var(--accent); opacity: 1; stroke-width: 2.2; }
+
+  #canvas{
+    position:relative;
+    z-index: 1;
+  }
+
+  .node{
+    position:absolute;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    white-space: nowrap;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height:1.2;
+    cursor: default;
+    user-select:none;
+    box-shadow: var(--shadow);
+    transition: transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .22s ease, filter .22s ease, opacity .25s ease, top .38s cubic-bezier(.2,.7,.3,1), left .38s cubic-bezier(.2,.7,.3,1);
+    transform-origin:center left;
+  }
+
+  .node.has-kids{ cursor: pointer; }
+
+  .node .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: rgba(255,255,255,.55);
+    flex: none;
+  }
+
+  .node .toggle{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.16);
+    flex: none;
+    margin-right: 2px;
+    transition: transform .3s cubic-bezier(.2,.7,.3,1), background .2s ease;
+  }
+  .node.leaf .toggle{ background: rgba(45,74,69,.10); }
+  .node.has-kids .toggle{ display:inline-flex; }
+  .node.collapsed .toggle{ transform: rotate(-90deg); }
+
+  .node .toggle svg{
+    width: 10px; height:10px;
+    display:block;
+  }
+  .node .toggle path{
+    stroke: currentColor;
+    stroke-width: 2;
+    fill:none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .node.has-kids:hover .toggle{
+    background: rgba(255,255,255,.28);
+  }
+  .node.leaf.has-kids:hover .toggle{
+    background: rgba(45,74,69,.18);
+  }
+
+  .node.collapsed{
+    box-shadow: var(--shadow), 0 0 0 3px rgba(201,138,94,.14);
+  }
+
+  .node.collapsed .badge{
+    display:inline-flex;
+  }
+  .node .badge{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #2c2115;
+    font-size: 10.5px;
+    font-weight: 700;
+    margin-left: 2px;
+    flex: none;
+  }
+
+  .node.root{
+    background: linear-gradient(155deg, #46586e, #34435a);
+    color: #f4f2ea;
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 500;
+    padding: 16px 26px;
+    letter-spacing:.2px;
+  }
+
+  .node.branch{
+    background: linear-gradient(155deg, #33473f, #29392f);
+    color: var(--leaf-text);
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+
+  .exercise-link{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(201,138,94,.22);
+    color: #f3efe6;
+    flex: none;
+    margin-left: 2px;
+    cursor: pointer;
+    transition: background .18s ease, transform .18s ease;
+  }
+  .exercise-link:hover, .exercise-link:focus-visible{
+    background: var(--accent);
+    transform: scale(1.12);
+    outline: none;
+  }
+  .exercise-link svg{
+    width: 11px; height: 11px;
+    display:block;
+  }
+  .exercise-link path, .exercise-link polyline, .exercise-link line{
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .node.leaf{
+    background: var(--paper);
+    color: var(--branch);
+    border: 1px solid rgba(45,74,69,.15);
+    font-weight: 500;
+  }
+  .node.leaf .dot{ background: var(--accent); opacity:.75; }
+
+  .node.leaf.has-info::after{
+    content:'';
+    width: 5px; height:5px;
+    border-radius:50%;
+    background: var(--accent);
+    margin-left: 2px;
+    box-shadow: 0 0 0 3px rgba(201,138,94,.18);
+  }
+
+  .node.dim{ opacity:.35; filter: saturate(.6); }
+
+  .node.leaf:hover, .node.leaf:focus-visible{
+    transform: translateY(-2px) scale(1.035);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(201,138,94,.55);
+    z-index: 5;
+    outline:none;
+  }
+
+  .node.branch:hover, .node.branch:focus-visible{
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: var(--shadow-hover);
+    z-index: 5;
+    outline:none;
+  }
+
+  .node.root:hover{
+    transform: translateY(-1px) scale(1.015);
+  }
+
+  .node:focus-visible{
+    box-shadow: 0 0 0 3px rgba(201,138,94,.45), var(--shadow-hover);
+  }
+
+  /* ---- Tooltip ---- */
+  #tooltip{
+    position:fixed;
+    z-index: 50;
+    max-width: 300px;
+    background: linear-gradient(165deg, #2c3a3a, #24302f);
+    color: #f2efe6;
+    padding: 14px 16px 15px;
+    border-radius: 12px;
+    font-size: 13.2px;
+    line-height: 1.55;
+    box-shadow: 0 10px 34px rgba(20,28,28,.32), 0 2px 8px rgba(20,28,28,.2);
+    opacity:0;
+    transform: translateY(4px) scale(.98);
+    pointer-events:none;
+    transition: opacity .16s ease, transform .16s ease;
+  }
+  #tooltip.show{
+    opacity:1;
+    transform: translateY(0) scale(1);
+  }
+  #tooltip .tt-title{
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 14.5px;
+    color: #fff;
+    margin: 0 0 6px;
+    display:flex; align-items:center; gap:7px;
+  }
+  #tooltip .tt-title::before{
+    content:'';
+    width:7px; height:7px; border-radius:50%;
+    background: var(--accent);
+    flex:none;
+  }
+  #tooltip .tt-body{ color: #d9dfd9; margin:0; }
+  #tooltip .tt-arrow{
+    position:absolute;
+    width:12px; height:12px;
+    background: #283635;
+    transform: rotate(45deg);
+  }
+
+  /* ---- Legend / footer note ---- */
+  .legend{
+    position: fixed;
+    right: 22px;
+    bottom: 20px;
+    z-index: 40;
+    background: rgba(251,250,246,.9);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(60,80,75,.12);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    box-shadow: var(--shadow);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .legend .lg-dot{
+    width:8px;height:8px;border-radius:50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(201,138,94,.18);
+  }
+
+  @media (max-width: 720px){
+    header{ padding: 32px 5vw 14px; }
+    .legend{ display:none; }
+  }
+
+  ::-webkit-scrollbar{ height:10px; width:10px; }
+  ::-webkit-scrollbar-track{ background: transparent; }
+  ::-webkit-scrollbar-thumb{ background: rgba(60,80,75,.22); border-radius:8px; }
+  ::-webkit-scrollbar-thumb:hover{ background: rgba(60,80,75,.34); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: .001ms !important; animation-duration:.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header>
+  <div class="header-text">
+    <p class="eyebrow" id="ui-eyebrow">Interactive Mind Map</p>
+    <h1 id="ui-title">Python Programming for Data Science</h1>
+    <p class="subtitle" id="ui-subtitle">Hover over any branch — its description appears right beside it. Click branches with children to expand or collapse them. Scroll to explore the map.</p>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button type="button" id="lang-en" class="active" data-lang="en">EN</button>
+    <button type="button" id="lang-tr" data-lang="tr">TR</button>
+  </div>
+</header>
+
+<div id="stage-wrap">
+  <div id="canvas-scroll">
+    <div id="canvas">
+      <svg id="lines"></svg>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip" role="tooltip">
+  <p class="tt-title" id="tt-title">Başlık</p>
+  <p class="tt-body" id="tt-body">Açıklama</p>
+  <div class="tt-arrow" id="tt-arrow"></div>
+</div>
+
+<div class="legend">
+  <span class="lg-dot"></span>
+  <span id="ui-legend">Has a description · click branches with children to expand/collapse</span>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   Tüm dallar ve açıklamaları burada tanımlı.
+   ============================================================ */
+/* ============================================================
+   LANGUAGE
+   ============================================================ */
+let LANG = 'en'; // 'en' (default) or 'tr'
+
+const UI_TEXT = {
+  en: {
+    eyebrow: "Interactive Mind Map",
+    title: "Python Programming for Data Science",
+    subtitle: "Hover over any branch — its description appears right beside it. Click branches with children to expand or collapse them. The small orange icon opens the matching Kaggle exercise notebook.",
+    legend: "Has a description · orange icon = practice exercise · click branches with children to expand/collapse",
+    exerciseLinkTitle: "Open the Kaggle exercise notebook for this topic"
+  },
+  tr: {
+    eyebrow: "Etkileşimli Zihin Haritası",
+    title: "Python Programming for Data Science",
+    subtitle: "En uçtaki dalların üzerine gelin — açıklaması tam yanında belirir. Alt dalı olan kutucuklara tıklayarak açıp kapatabilirsiniz. Küçük turuncu ikon, ilgili Kaggle egzersiz notebook'unu açar.",
+    legend: "Açıklaması olan dal · turuncu ikon = pratik egzersiz · alt dalı olanlara tıkla, aç/kapat",
+    exerciseLinkTitle: "Bu konunun Kaggle egzersiz notebook'unu aç"
+  }
+};
+
+function applyUIText(){
+  const t = UI_TEXT[LANG];
+  document.getElementById('ui-eyebrow').textContent = t.eyebrow;
+  document.getElementById('ui-title').textContent = t.title;
+  document.getElementById('ui-subtitle').textContent = t.subtitle;
+  document.getElementById('ui-legend').textContent = t.legend;
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('.exercise-link').forEach(elm => {
+    elm.title = t.exerciseLinkTitle;
+  });
+}
+
+const DATA = {
+  name: "Python Programming for Data Science",
+  info_en: "This mind map, generated by NotebookLM, brings together the six core building blocks of learning Python for data science: syntax, numbers, functions, boolean logic, lists, and objects.",
+  info_tr: "NotebookLM tarafından üretilen bu zihin haritası, veri bilimi için Python öğreniminin altı temel yapı taşını bir araya getiriyor: sözdizimi, sayılar, fonksiyonlar, boole mantığı, listeler ve nesneler.",
+  children: [
+    {
+      name: "Syntax and Variables",
+      info_en: "Python's basic grammar rules: how variables are defined, and how code is read and interpreted.",
+      info_tr: "Python'un temel dilbilgisi kuralları: değişkenlerin nasıl tanımlandığı, kodun nasıl okunduğu ve yorumlandığı.",
+      exercise: "https://github.com/drakearch/kaggle-courses/blob/master/python/01-syntax-variables-and-numbers.ipynb",
+      children: [
+        { name: "Variable Assignment (=)", info_en: "The '=' sign binds a value to a name; e.g. x = 5 assigns the value 5 to the variable x. Unlike equality in math, this is an 'assignment' operation.", info_tr: "'=' işareti bir değeri bir isme bağlar; örn. x = 5, x adlı değişkene 5 değerini atar. Matematikteki eşitlikten farklı olarak burada bir 'atama' işlemidir." },
+        { name: "Dynamic Typing", info_en: "In Python you don't need to declare a variable's type in advance; a variable automatically takes on the type of whatever value it holds (int, str, float, etc). The type is determined at runtime.", info_tr: "Python'da bir değişkenin türünü önceden belirtmeniz gerekmez; değişken hangi değeri tutarsa o türe otomatik bürünür (int, str, float vb.). Tür çalışma zamanında belirlenir." },
+        { name: "Comments (#)", info_en: "Anything after a # sign on a line is ignored by Python; used to explain code or temporarily disable it.", info_tr: "# işaretinden sonraki satır kodun geri kalanı Python tarafından çalıştırılmaz; kodu açıklamak veya geçici olarak devre dışı bırakmak için kullanılır." },
+        { name: "Indented Code Blocks", info_en: "Instead of curly braces {}, Python uses indentation (spaces/tabs) to separate code blocks (if, for, function bodies, etc). Consistent indentation is mandatory.", info_tr: "Python, süslü parantez {} yerine girinti (boşluk/tab) kullanarak kod bloklarını (if, for, fonksiyon gövdesi vb.) birbirinden ayırır. Girinti tutarlılığı zorunludur." },
+        { name: "Strings (Single/Double Quotes)", info_en: "Text data can be created with single quotes ('...') or double quotes (\"...\"); both work identically, the choice is usually about style or the quote characters inside the string.", info_tr: "Metin verileri tek tırnak ('...') veya çift tırnak (\"...\") ile oluşturulabilir; ikisi de işlevsel olarak aynıdır, seçim genelde stil veya içindeki tırnak karakterine göre yapılır." }
+      ]
+    },
+    {
+      name: "Numbers and Arithmetic",
+      info_en: "Numeric data types and the basic mathematical operations performed on them.",
+      info_tr: "Sayısal veri türleri ve bunlar üzerinde yapılan temel matematiksel işlemler.",
+      exercise: "https://github.com/drakearch/kaggle-courses/blob/master/python/01-syntax-variables-and-numbers.ipynb",
+      children: [
+        { name: "Types (int, float)", info_en: "int represents whole numbers (1, 42, -7), while float represents decimal numbers (3.14, -0.5). In data science, the difference affects precision and memory usage.", info_tr: "int tam sayıları (1, 42, -7), float ise ondalıklı sayıları (3.14, -0.5) temsil eder. Veri biliminde ikisi arasındaki fark hassasiyet ve bellek kullanımını etkiler." },
+        {
+          name: "Arithmetic Operators",
+          info_en: "The basic mathematical operator symbols in Python. Each performs a different kind of calculation.",
+          info_tr: "Python'daki temel matematiksel işlem sembolleri. Her biri farklı bir hesaplama türü gerçekleştirir.",
+          children: [
+            { name: "Addition/Subtraction (+, -)", info_en: "+ adds two numbers, - subtracts one from another; the most basic arithmetic operations, and + can also be used to concatenate strings.", info_tr: "+ iki sayıyı toplar, - ise birini diğerinden çıkarır; en temel aritmetik işlemlerdir, sayılar veya string birleştirme (+) için de kullanılabilir." },
+            { name: "Multiplication/Division (*, /)", info_en: "* multiplies, / divides. In Python 3, / always returns a decimal (float) result; use // for integer division.", info_tr: "* çarpma, / ise bölme işlemidir. Python 3'te / işlemi her zaman ondalıklı (float) bir sonuç döndürür, tam sayı bölmesi için // kullanılır." },
+            { name: "Floor Division (//)", info_en: "// rounds the division result down to the nearest whole number (discarding the decimal part); e.g. 7 // 2 equals 3, useful for integer division.", info_tr: "// işlemi bölme sonucunu en yakın küçük tam sayıya yuvarlar (ondalık kısmı atar); örn. 7 // 2 sonucu 3'tür, tam sayı bölmeleri için kullanışlıdır." },
+            { name: "Modulus (%)", info_en: "% returns the remainder of a division; e.g. 7 % 2 = 1. Often used to check whether a number is even or odd.", info_tr: "% işlemi bir bölmenin kalanını verir; örn. 7 % 2 = 1. Bir sayının çift/tek olup olmadığını kontrol etmek gibi durumlarda sıkça kullanılır." },
+            { name: "Exponentiation (**)", info_en: "** raises a number to a power; e.g. 2 ** 3 = 8. You can also take a square root using ** 0.5.", info_tr: "** işlemi bir sayının üssünü alır; örn. 2 ** 3 = 8. Karekök almak için de ** 0.5 şeklinde kullanılabilir." }
+          ]
+        },
+        { name: "Order of Operations (PEMDAS)", info_en: "Python applies operator precedence just like in math: Parentheses first, then Exponents, then Multiplication/Division, and finally Addition/Subtraction. When in doubt, parentheses are the safest choice.", info_tr: "Python işlem önceliğini matematikteki gibi uygular: önce Parantez, sonra Üs, ardından Çarpma/Bölme, en son Toplama/Çıkarma. Belirsizlik durumunda parantez kullanmak en güvenlisidir." },
+        { name: "Built-in Functions (min, max, abs)", info_en: "Python provides ready-made functions like min() to find the smallest value, max() to find the largest, and abs() to get the absolute value — no extra library needed.", info_tr: "Python; en küçük değeri bulmak için min(), en büyüğü bulmak için max(), ve mutlak değeri almak için abs() gibi hazır fonksiyonlar sunar — bunları kullanmak için ekstra kütüphane gerekmez." }
+      ]
+    },
+    {
+      name: "Functions and Help",
+      info_en: "Ways to break code into reusable pieces, and how to access Python's own documentation.",
+      info_tr: "Kodu yeniden kullanılabilir parçalara ayırma ve Python'un kendi dokümantasyonuna erişme yöntemleri.",
+      exercise: "https://github.com/drakearch/kaggle-courses/blob/master/python/02-functions-and-getting-help.ipynb",
+      children: [
+        { name: "help() Function", info_en: "The help(object) command shows Python's built-in documentation for any function, module, or object directly in the console; the first place to look when you forget what something does.", info_tr: "help(nesne) komutu, herhangi bir fonksiyon, modül veya nesne hakkında Python'un yerleşik dokümantasyonunu doğrudan konsolda gösterir; ne işe yaradığını unuttuğunuzda ilk başvurulacak yerdir." },
+        { name: "Defining Functions (def)", info_en: "The def keyword is used to define a new function; e.g. def add(a, b):  — this creates a block of code that can be reused repeatedly.", info_tr: "def anahtar kelimesi yeni bir fonksiyon tanımlamak için kullanılır; örn. def topla(a, b):  — bu, tekrar tekrar kullanılabilecek bir kod bloğu oluşturur." },
+        { name: "Return Statement", info_en: "The return statement makes a function send back a value and end its execution. A function without return returns None by default.", info_tr: "return ifadesi bir fonksiyonun bir değeri geri döndürmesini ve çalışmasını sonlandırmasını sağlar. return içermeyen fonksiyonlar varsayılan olarak None döndürür." },
+        { name: "Docstrings (Triple-quoted)", info_en: "A description written right under a function using triple quotes (\"\"\"...\"\"\"); this text is shown when help() is called, the standard way to document code.", info_tr: "Bir fonksiyonun hemen altına üç tırnak (\"\"\"...\"\"\") ile yazılan açıklama metnidir; help() fonksiyonu çağrıldığında bu metin görüntülenir, kodu belgelemenin standart yoludur." },
+        { name: "Default Arguments", info_en: "A function parameter can be given a default value, e.g. def greet(name=\"World\"): — if the function is called without that parameter, the default value is used.", info_tr: "Bir fonksiyon parametresine varsayılan bir değer atanabilir, örn. def selamla(isim=\"Dünya\"): — fonksiyon o parametre verilmeden çağrılırsa varsayılan değer kullanılır." },
+        { name: "Higher-order Functions", info_en: "Functions that take other functions as parameters, or return a function as a result; e.g. map() and filter(), commonly used in data science workflows.", info_tr: "Başka fonksiyonları parametre olarak alan veya bir fonksiyonu sonuç olarak döndüren fonksiyonlardır; örn. map() ve filter(), veri bilimi iş akışlarında sıkça kullanılır." }
+      ]
+    },
+    {
+      name: "Booleans and Conditionals",
+      info_en: "Logical true/false values, and the program's decision-making mechanisms.",
+      info_tr: "Mantıksal doğru/yanlış değerleri ve programın karar alma mekanizmaları.",
+      exercise: "https://github.com/drakearch/kaggle-courses/blob/master/python/03-booleans-and-conditionals.ipynb",
+      children: [
+        { name: "Values (True, False)", info_en: "The boolean (bool) type can only take two values: True and False. These values form the basis of conditional expressions and logical operations.", info_tr: "Boole (bool) türü sadece iki değer alabilir: True (doğru) ve False (yanlış). Bu değerler koşullu ifadelerin ve mantıksal işlemlerin temelini oluşturur." },
+        { name: "Comparison Operators (==, !=, <, >, <=, >=)", info_en: "Compares two values and produces a boolean result: == checks equality, != checks inequality, < less than, > greater than, <= less than or equal, >= greater than or equal.", info_tr: "İki değeri karşılaştırıp bir boole sonucu üretir: == eşit mi, != eşit değil mi, < küçük mü, > büyük mü, <= küçük eşit mi, >= büyük eşit mi kontrol eder." },
+        { name: "Logical Operators (and, or, not)", info_en: "Used to combine multiple boolean expressions: and returns True only if both conditions are true, or returns True if at least one is true, and not reverses a value.", info_tr: "Birden fazla boole ifadesini birleştirmek için kullanılır: and her iki koşul da doğruysa True döner, or en az biri doğruysa True döner, not ise bir değeri tersine çevirir." },
+        { name: "Branching Logic (if, elif, else)", info_en: "Lets the program follow different code paths depending on conditions: if checks a condition, elif adds alternative conditions, else runs when none of them are met.", info_tr: "Programın farklı koşullara göre farklı kod yolları izlemesini sağlar: if bir koşulu kontrol eder, elif alternatif koşullar ekler, else hiçbiri sağlanmazsa çalışır." },
+        { name: "Boolean Conversion (bool())", info_en: "The bool() function converts any value to True or False; values like 0, an empty string (\"\"), an empty list ([]), and None are considered False, almost everything else is True.", info_tr: "bool() fonksiyonu herhangi bir değeri True veya False'a çevirir; 0, boş string (\"\"), boş liste ([]) ve None gibi değerler False sayılır, geri kalan hemen hemen her şey True sayılır." }
+      ]
+    },
+    {
+      name: "Lists and Tuples",
+      info_en: "Ordered data structures used to hold multiple values in a single variable.",
+      info_tr: "Birden fazla değeri tek bir değişkende tutmak için kullanılan sıralı veri yapıları.",
+      exercise: "https://github.com/drakearch/kaggle-courses/blob/master/python/04-lists.ipynb",
+      children: [
+        { name: "Lists", info_en: "Defined with square brackets [1, 2, 3], an ordered and mutable collection type; items can be added, removed, or changed — one of the most commonly used structures in data science.", info_tr: "Köşeli parantezle [1, 2, 3] tanımlanan, sıralı ve değiştirilebilir (mutable) bir koleksiyon türüdür; öğeler eklenebilir, silinebilir veya değiştirilebilir — veri bilimi için en sık kullanılan yapılardan biridir." },
+        { name: "Tuples", info_en: "Defined with parentheses (1, 2, 3), an ordered but immutable collection type; once created, its contents cannot change, which makes it safe for fixed data sets.", info_tr: "Parantezle (1, 2, 3) tanımlanan, sıralı ama değiştirilemez (immutable) bir koleksiyon türüdür; bir kez oluşturulduktan sonra içeriği değiştirilemez, bu da onu sabit veri kümeleri için güvenli kılar." }
+      ]
+    },
+    {
+      name: "Objects and Methods",
+      info_en: "The concept that every piece of data in Python is an 'object', and these objects have their own behaviors (methods).",
+      info_tr: "Python'daki her verinin bir 'nesne' olduğu ve bu nesnelerin kendine özgü davranışlara (metodlara) sahip olduğu kavramı.",
+      children: [
+        { name: "Attributes (Dot Syntax)", info_en: "An object's properties are accessed using dot (.) syntax; e.g. not a list's length, but a DataFrame's df.shape property is read this way.", info_tr: "Bir nesnenin özelliklerine nokta (.) sözdizimi ile erişilir; örn. bir listenin uzunluğu değil ama bir DataFrame'in df.shape gibi özellikleri bu şekilde okunur." },
+        { name: "Methods (Attached Functions)", info_en: "Functions that are 'attached' to an object and operate on it; e.g. my_list.append(4) — here append() is a method specific to lists, called with dot syntax.", info_tr: "Bir nesneye 'bağlı' olan ve o nesne üzerinde işlem yapan fonksiyonlardır; örn. bir_liste.append(4) — burada append(), listeye özel bir metoddur ve nokta sözdizimiyle çağrılır." },
+        { name: "type() Function", info_en: "The type(object) command tells you which data type a given value belongs to (int, str, list, dict, etc); frequently used to check a variable's type given Python's dynamic typing.", info_tr: "type(nesne) komutu, verilen bir değerin hangi veri türüne ait olduğunu söyler (int, str, list, dict vb.); dinamik tipleme nedeniyle bir değişkenin türünü kontrol etmek için sıkça kullanılır." }
+      ]
+    },
+    {
+      name: "Loops and List Comprehensions",
+      info_en: "Python's tools for repetition: how to repeat actions with loops, and the elegant one-line syntax for building lists — a fan-favorite Python feature.",
+      info_tr: "Python'un tekrar araçları: bir işlemi döngülerle nasıl tekrarlayacağınız ve liste oluşturmanın zarif tek satırlık sözdizimi — Python kullanıcılarının en sevdiği özelliklerden biri.",
+      exercise: "https://github.com/drakearch/kaggle-courses/blob/master/python/05-loops-and-list-comprehensions.ipynb",
+      children: [
+        { name: "For Loops", info_en: "A for loop runs a block of code once for each item in a sequence (a list, a range, a string...); e.g. for i in range(5):. It's the most common way to iterate in Python. The related exercise even includes a 'find the sneaky bug' debugging challenge.", info_tr: "Bir for döngüsü, bir dizideki (liste, range, string vb.) her öğe için bir kod bloğunu tekrar tekrar çalıştırır; örn. for i in range(5):. Python'da yineleme yapmanın en yaygın yoludur. İlgili egzersizde 'gizli hatayı bul' tarzında eğlenceli bir debug alıştırması da bulunuyor." },
+        { name: "While Loops", info_en: "A while loop keeps repeating a block of code as long as a condition stays True; useful when you don't know in advance how many repetitions you'll need — just make sure the condition eventually turns False, or the loop never ends.", info_tr: "Bir while döngüsü, bir koşul True kaldığı sürece bir kod bloğunu tekrarlar; kaç kez tekrarlanacağını önceden bilmediğiniz durumlarda kullanışlıdır — ancak koşulun er ya da geç False olmasını sağlamalısınız, aksi halde döngü hiç bitmez." },
+        { name: "range() Function", info_en: "range(n) produces a sequence of numbers from 0 up to (but not including) n. It returns a lazy 'range object' rather than a real list — it behaves like one for looping, but doesn't store every value in memory; wrap it in list() if you want to see the actual numbers.", info_tr: "range(n), 0'dan başlayıp n'e kadar (n dahil değil) bir sayı dizisi üretir. Gerçek bir liste değil, tembel (lazy) bir 'range nesnesi' döndürür — döngü için liste gibi davranır ama her değeri belleğe kaydetmez; sayıları doğrudan görmek isterseniz list() içine sarabilirsiniz." },
+        { name: "List Comprehensions", info_en: "A compact, one-line way to build a new list, e.g. [x*2 for x in nums]; you can add a condition too, e.g. [x for x in nums if x > 0]. Combined with functions like min, max, sum, len, and sorted, comprehensions enable impressively short one-line solutions to problems that would otherwise take several lines.", info_tr: "Yeni bir listeyi tek satırda oluşturmanın kompakt yolu, örn. [x*2 for x in sayılar]; bir koşul da ekleyebilirsiniz, örn. [x for x in sayılar if x > 0]. min, max, sum, len ve sorted gibi fonksiyonlarla birleştiğinde, normalde birkaç satır sürecek problemlere şaşırtıcı derecede kısa tek satırlık çözümler sağlar." },
+        { name: "enumerate() Function", info_en: "enumerate(list) lets you loop over a sequence while automatically tracking the index of each item, e.g. for i, item in enumerate(my_list):  — no need to manually manage a separate counter variable.", info_tr: "enumerate(liste), bir dizi üzerinde döngü kurarken her öğenin indeksini otomatik olarak takip etmenizi sağlar, örn. for i, oge in enumerate(liste):  — ayrı bir sayaç değişkenini elle yönetmenize gerek kalmaz." },
+        { name: "zip() Function", info_en: "zip(list1, list2) pairs up items from two (or more) sequences at matching positions so you can loop over them together, e.g. for name, score in zip(names, scores):.", info_tr: "zip(liste1, liste2), iki (veya daha fazla) dizideki aynı konumdaki öğeleri eşleştirerek birlikte döngüye almanızı sağlar, örn. for isim, puan in zip(isimler, puanlar):." }
+      ]
+    }
+  ]
+};
+
+/* ============================================================
+   LAYOUT ENGINE
+   Basit, öngörülebilir bir "tidy tree" yerleşimi: her düğüm
+   derinliğine göre bir X sütununa, çocuklarının merkezine göre
+   bir Y konumuna yerleştirilir.
+   ============================================================ */
+
+const LEVEL_GAP = [0, 300, 300, 300];   // root->L1, L1->L2, L2->L3 arası yatay boşluk
+const NODE_H = 46;         // düğüm yüksekliği tahmini (spacing hesaplarında)
+const MIN_GAP = 14;        // aynı seviyedeki düğümler arası minimum boşluk
+const START_X = 40;
+
+let idCounter = 0;
+function prepare(node, depth){
+  node._id = 'n' + (idCounter++);
+  node._depth = depth;
+  node._children = node.children || [];
+  node._collapsed = false; // kullanıcı bu düğümü kapattı mı
+  node._children.forEach(c => prepare(c, depth+1));
+}
+prepare(DATA, 0);
+
+// "Etkin çocuklar": bir düğüm kapalıysa, layout hesaplarında çocuğu yokmuş gibi davran
+function activeChildren(node){
+  return node._collapsed ? [] : node._children;
+}
+
+// 1. Yaprak sayımıyla her düğüme bir "ağırlık" (kaç yaprak kapsadığı) ver
+//    (kapalı dallar tek bir yaprakmış gibi sayılır)
+function countLeaves(node){
+  const kids = activeChildren(node);
+  if(!kids.length){
+    node._leaves = 1;
+    return 1;
+  }
+  let sum = 0;
+  kids.forEach(c => sum += countLeaves(c));
+  node._leaves = sum;
+  return sum;
+}
+
+// 2. Y konumlarını ata (yaprak sırasına göre eşit aralıklı, üst düğümler ortalanır)
+const LEAF_SLOT = NODE_H + MIN_GAP;
+
+function assignY(node, cursorRef){
+  const kids = activeChildren(node);
+  if(!kids.length){
+    node._y = cursorRef.v * LEAF_SLOT;
+    cursorRef.v++;
+    return node._y;
+  }
+  const ys = kids.map(c => assignY(c, cursorRef));
+  node._y = (Math.min(...ys) + Math.max(...ys)) / 2;
+  return node._y;
+}
+
+// 3. X konumlarını derinliğe göre ata (sadece etkin/görünür çocuklara iner)
+function assignX(node, xAcc){
+  node._x = xAcc;
+  const nextGap = LEVEL_GAP[Math.min(node._depth+1, LEVEL_GAP.length-1)] || 320;
+  activeChildren(node).forEach(c => assignX(c, xAcc + nextGap));
+}
+
+// Tüm düğümlerin düz listesi (her zaman TÜM ağaç — DOM'da hepsi var,
+// sadece görünürlük class'ıyla gizleniyor/gösteriliyor)
+const allNodes = [];
+const allLinks = [];
+function flattenAll(node){
+  allNodes.push(node);
+  node._children.forEach(c => {
+    allLinks.push({ from: node, to: c });
+    flattenAll(c);
+  });
+}
+flattenAll(DATA);
+
+// Layout'u yeniden hesapla (collapsed state değiştiğinde çağrılır)
+function recomputeLayout(){
+  countLeaves(DATA);
+  assignY(DATA, {v:0});
+  assignX(DATA, START_X);
+}
+recomputeLayout();
+
+// Bir düğüm görünür mü? (kökten kendisine kadar tüm atalar açık olmalı)
+function isVisible(node){
+  let p = parentOf(node);
+  while(p){
+    if(p._collapsed) return false;
+    p = parentOf(p);
+  }
+  return true;
+}
+const parentMap = new Map();
+(function buildParentMap(node){
+  node._children.forEach(c => { parentMap.set(c._id, node); buildParentMap(c); });
+})(DATA);
+function parentOf(node){ return parentMap.get(node._id) || null; }
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const canvas = document.getElementById('canvas');
+const svg = document.getElementById('lines');
+const tooltip = document.getElementById('tooltip');
+const ttTitle = document.getElementById('tt-title');
+const ttBody = document.getElementById('tt-body');
+const ttArrow = document.getElementById('tt-arrow');
+const scrollHost = document.getElementById('canvas-scroll');
+
+const PAD_TOP = 40;
+const PAD_LEFT = 30;
+
+function currentExtent(){
+  let maxX = 0, maxY = 0;
+  allNodes.forEach(n => {
+    if(!isVisible(n) && n._depth !== 0) return;
+    maxX = Math.max(maxX, n._x);
+    maxY = Math.max(maxY, n._y);
+  });
+  return {maxX, maxY};
+}
+
+function resizeCanvas(){
+  const {maxX, maxY} = currentExtent();
+  const w = maxX + 480;
+  const h = maxY + PAD_TOP*2 + NODE_H;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+}
+resizeCanvas();
+
+function levelClass(depth){
+  if(depth === 0) return 'root';
+  if(depth === 1) return 'branch';
+  // depth 2 leaves that themselves have children (e.g. Arithmetic Operators)
+  return 'leaf';
+}
+
+const CHEVRON_SVG = `<svg viewBox="0 0 10 10"><path d="M2.5 3.5L5 6.5L7.5 3.5"/></svg>`;
+const EXTERNAL_LINK_SVG = `<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+
+// --- Build DOM nodes first (need their size before drawing curves precisely,
+//     but we already know approx height, so we just position by center-Y)
+const nodeEls = new Map();
+
+allNodes.forEach(node => {
+  const el = document.createElement('div');
+  const cls = levelClass(node._depth);
+  el.className = 'node ' + cls;
+  el.dataset.id = node._id;
+
+  const hasKids = node._children.length > 0;
+  if(hasKids) el.classList.add('has-kids');
+
+  const hasLeafInfo = (cls === 'leaf' && (node.info_en || node.info_tr));
+  if(hasLeafInfo) el.classList.add('has-info');
+
+  if(hasKids){
+    const toggle = document.createElement('span');
+    toggle.className = 'toggle';
+    toggle.innerHTML = CHEVRON_SVG;
+    el.appendChild(toggle);
+  } else {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    el.appendChild(dot);
+  }
+
+  const label = document.createElement('span');
+  label.className = 'label';
+  label.textContent = node.name;
+  el.appendChild(label);
+
+  if(hasKids){
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = node._children.length;
+    el.appendChild(badge);
+  }
+
+  if(node.exercise){
+    const linkBtn = document.createElement('span');
+    linkBtn.className = 'exercise-link';
+    linkBtn.innerHTML = EXTERNAL_LINK_SVG;
+    linkBtn.tabIndex = 0;
+    linkBtn.setAttribute('role','link');
+    linkBtn.title = UI_TEXT[LANG].exerciseLinkTitle;
+    linkBtn.dataset.exerciseTitle = '1';
+    linkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.open(node.exercise, '_blank', 'noopener');
+    });
+    linkBtn.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(node.exercise, '_blank', 'noopener');
+      }
+    });
+    linkBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+    el.appendChild(linkBtn);
+  }
+
+  if(cls !== 'root'){
+    el.tabIndex = 0;
+  }
+  if(hasKids){
+    el.setAttribute('role','button');
+    el.setAttribute('aria-expanded','true');
+  }
+
+  el.style.left = (PAD_LEFT + node._x) + 'px';
+  el.style.top = (PAD_TOP + node._y) + 'px';
+
+  canvas.appendChild(el);
+  nodeEls.set(node._id, el);
+});
+
+// gerçek render yüksekliğini bir kere ölçüp sakla (dikey ortalama için)
+const nodeHeights = new Map();
+requestAnimationFrame(() => {
+  allNodes.forEach(node => {
+    nodeHeights.set(node._id, nodeEls.get(node._id).offsetHeight);
+  });
+  applyLayout(false);
+});
+
+// Layoutu DOM'a uygula: her düğümü konumlandır, gizli düğümleri sakla
+function applyLayout(animate){
+  allNodes.forEach(node => {
+    const el = nodeEls.get(node._id);
+    const visible = (node._depth === 0) || isVisible(node);
+    if(!visible){
+      el.style.visibility = 'hidden';
+      el.style.pointerEvents = 'none';
+      return;
+    }
+    el.style.visibility = 'visible';
+    el.style.pointerEvents = 'auto';
+    const h = nodeHeights.get(node._id) || NODE_H;
+    el.style.left = (PAD_LEFT + node._x) + 'px';
+    el.style.top = (PAD_TOP + node._y - h/2) + 'px';
+  });
+  resizeCanvas();
+  drawLinks();
+}
+
+// --- Links (smooth cubic bezier curves), redrawn after node centering
+function pathFor(fromNode, toNode){
+  const fromEl = nodeEls.get(fromNode._id);
+  const toEl = nodeEls.get(toNode._id);
+  const fromW = fromEl.offsetWidth;
+  const fromTop = parseFloat(fromEl.style.top);
+  const toTop = parseFloat(toEl.style.top);
+  const fromH = fromEl.offsetHeight;
+  const toH = toEl.offsetHeight;
+
+  const x1 = parseFloat(fromEl.style.left) + fromW;
+  const y1 = fromTop + fromH/2;
+  const x2 = parseFloat(toEl.style.left);
+  const y2 = toTop + toH/2;
+
+  const dx = Math.max(60, (x2 - x1) * 0.55);
+  return `M ${x1} ${y1} C ${x1+dx} ${y1}, ${x2-dx} ${y2}, ${x2} ${y2}`;
+}
+
+let linkEls = [];
+function drawLinks(){
+  svg.innerHTML = '';
+  linkEls = [];
+  allLinks.forEach(link => {
+    const toVisible = (link.to._depth === 0) || isVisible(link.to);
+    const fromVisible = (link.from._depth === 0) || isVisible(link.from);
+    if(!toVisible || !fromVisible) return; // ebeveyni kapalı, çizme
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', pathFor(link.from, link.to));
+    path.setAttribute('class', 'link' + (link.from._depth === 0 ? ' root-link' : ''));
+    path.dataset.from = link.from._id;
+    path.dataset.to = link.to._id;
+    svg.appendChild(path);
+    linkEls.push(path);
+  });
+}
+
+/* ============================================================
+   INTERACTION: hover highlight + tooltip
+   ============================================================ */
+
+function ancestorChain(node){
+  // returns array of node ids from root to this node (inclusive)
+  const path = [];
+  function find(n, target, trail){
+    trail = trail.concat([n._id]);
+    if(n._id === target._id){ path.push(...trail); return true; }
+    for(const c of n._children){
+      if(find(c, target, trail)) return true;
+    }
+    return false;
+  }
+  find(DATA, node, []);
+  return path;
+}
+
+function idToNode(id){
+  return allNodes.find(n => n._id === id);
+}
+
+function highlightPath(node){
+  const chain = ancestorChain(node); // array of ids root..node
+  const chainSet = new Set(chain);
+
+  allNodes.forEach(n => {
+    const el = nodeEls.get(n._id);
+    if(chainSet.has(n._id)){
+      el.classList.remove('dim');
+    } else {
+      el.classList.add('dim');
+    }
+  });
+
+  linkEls.forEach(path => {
+    const f = path.dataset.from, t = path.dataset.to;
+    const isLit = chainSet.has(f) && chainSet.has(t);
+    path.classList.toggle('lit', isLit);
+    path.classList.toggle('dim', !isLit);
+  });
+}
+
+function clearHighlight(){
+  allNodes.forEach(n => nodeEls.get(n._id).classList.remove('dim'));
+  linkEls.forEach(p => { p.classList.remove('lit'); p.classList.remove('dim'); });
+}
+
+function showTooltip(node, el){
+  const infoText = node['info_' + LANG];
+  if(!infoText) return;
+  ttTitle.textContent = node.name;
+  ttBody.textContent = infoText;
+  tooltip.classList.add('show');
+
+  const elRect = el.getBoundingClientRect();
+
+  // Reset arrow classes/inline styles before measuring
+  tooltip.style.left = '0px';
+  tooltip.style.top = '0px';
+  const ttW = tooltip.offsetWidth;
+  const ttH = tooltip.offsetHeight;
+  const margin = 10;
+  const GAP = 12; // kutucukla tooltip arasındaki boşluk
+
+  // Öncelik: kutucuğun tam SAĞINDA, dikey olarak ortalanmış konumda göster
+  // (mouse imleci hâlâ kutucuğun üzerinde kalır, tooltip onun yanına oturur)
+  let placement = 'right';
+  let left = elRect.right + GAP;
+  let top = elRect.top + elRect.height/2 - ttH/2;
+
+  // Sağda yer yoksa sola geç
+  if(left + ttW > window.innerWidth - margin){
+    placement = 'left';
+    left = elRect.left - GAP - ttW;
+  }
+
+  // Sol tarafta da yer yoksa (çok dar ekran / kutucuk sayfanın solunda),
+  // kutucuğun ALTINA düşür ve yatayda ortala
+  if(left < margin){
+    placement = 'bottom';
+    left = elRect.left + elRect.width/2 - ttW/2;
+    top = elRect.bottom + GAP;
+  }
+
+  // Dikeyde ekrandan taşmayı düzelt
+  if(top < margin) top = margin;
+  if(top + ttH > window.innerHeight - margin) top = window.innerHeight - margin - ttH;
+  // Yatayda (bottom-placement durumunda) taşmayı düzelt
+  if(left < margin) left = margin;
+  if(left + ttW > window.innerWidth - margin) left = window.innerWidth - margin - ttW;
+
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+
+  // Ok konumu ve yönü, seçilen yerleşime göre
+  ttArrow.style.top = 'auto';
+  ttArrow.style.bottom = 'auto';
+  ttArrow.style.left = 'auto';
+  ttArrow.style.right = 'auto';
+
+  if(placement === 'right'){
+    ttArrow.style.left = '-6px';
+    const arrowY = Math.min(Math.max(elRect.top + elRect.height/2 - top, 18), ttH - 18);
+    ttArrow.style.top = arrowY + 'px';
+    ttArrow.style.transform = 'rotate(45deg)';
+  } else if(placement === 'left'){
+    ttArrow.style.right = '-6px';
+    const arrowY = Math.min(Math.max(elRect.top + elRect.height/2 - top, 18), ttH - 18);
+    ttArrow.style.top = arrowY + 'px';
+    ttArrow.style.transform = 'rotate(45deg)';
+  } else {
+    // bottom
+    ttArrow.style.top = '-6px';
+    const arrowX = Math.min(Math.max(elRect.left + elRect.width/2 - left, 20), ttW - 20);
+    ttArrow.style.left = arrowX + 'px';
+    ttArrow.style.transform = 'rotate(45deg)';
+  }
+}
+
+function hideTooltip(){
+  tooltip.classList.remove('show');
+}
+
+// --- Açma/Kapama (expand/collapse) ---
+
+// Genişletilen dalın (ve yeni görünen çocuklarının) üzerine kamerayı kaydırır
+function scrollToReveal(node){
+  const kids = activeChildren(node);
+  const nodeEl = nodeEls.get(node._id);
+  const nodeW = nodeEl ? nodeEl.offsetWidth : 150;
+  const nodeLeft = PAD_LEFT + node._x;
+
+  // Düğüm + doğrudan çocuklarının kapladığı yatay aralığı bul
+  let minX = nodeLeft;
+  let maxX = nodeLeft + nodeW;
+  kids.forEach(c => {
+    const cLeft = PAD_LEFT + c._x;
+    const cEl = nodeEls.get(c._id);
+    const cW = cEl ? cEl.offsetWidth : 180;
+    maxX = Math.max(maxX, cLeft + cW);
+  });
+
+  const viewportW = scrollHost.clientWidth;
+  const margin = 48;
+  const totalSpan = maxX - minX;
+
+  let targetScrollLeft;
+  if(totalSpan + margin*2 <= viewportW){
+    // Hepsi sığıyorsa, aralığı yatayda ortala
+    targetScrollLeft = minX - (viewportW - totalSpan)/2;
+  } else {
+    // Sığmıyorsa, düğümü sola yakın tut ki çocuklar sağa doğru görünsün
+    targetScrollLeft = nodeLeft - margin;
+  }
+  const maxScrollLeft = Math.max(0, scrollHost.scrollWidth - viewportW);
+  targetScrollLeft = Math.min(Math.max(0, targetScrollLeft), maxScrollLeft);
+
+  // Dikeyde: düğümün (ve çocuklarının ortalaması olan) merkezini pencerede ortala
+  const hostDocTop = scrollHost.getBoundingClientRect().top + window.scrollY;
+  const nodeCenterYDoc = hostDocTop + PAD_TOP + node._y;
+  const targetScrollTop = Math.max(0, nodeCenterYDoc - window.innerHeight/2);
+
+  scrollHost.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+  window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+}
+
+function toggleNode(node, el){
+  node._collapsed = !node._collapsed;
+  el.classList.toggle('collapsed', node._collapsed);
+  el.setAttribute('aria-expanded', String(!node._collapsed));
+
+  // Kapatılan dalın altındaki tüm tooltip/hover durumunu temizle
+  hideTooltip();
+  clearHighlight();
+
+  recomputeLayout();
+  applyLayout(true);
+
+  if(!node._collapsed){
+    // Az önce genişletildi: kamerayı yeni açılan alana kaydır
+    scrollToReveal(node);
+  }
+}
+
+allNodes.forEach(node => {
+  const el = nodeEls.get(node._id);
+  const hasKids = node._children.length > 0;
+
+  if(node._depth === 0){
+    // Kök düğüm: tıklayınca en üst seviyedeki tüm dalları aç/kapat (opsiyonel kolaylık)
+    return;
+  }
+
+  el.addEventListener('mouseenter', () => {
+    highlightPath(node);
+    showTooltip(node, el);
+  });
+  el.addEventListener('mouseleave', () => {
+    clearHighlight();
+    hideTooltip();
+  });
+  el.addEventListener('focus', () => {
+    highlightPath(node);
+    showTooltip(node, el);
+  });
+  el.addEventListener('blur', () => {
+    clearHighlight();
+    hideTooltip();
+  });
+
+  if(hasKids){
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleNode(node, el);
+    });
+    el.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        toggleNode(node, el);
+      }
+    });
+  }
+
+  // touch support: dokunuşta hem tooltip göster hem de (varsa) aç/kapat tıklamasına izin ver
+  el.addEventListener('touchstart', (e) => {
+    highlightPath(node);
+    showTooltip(node, el);
+  }, {passive:true});
+});
+
+// re-draw links + reposition on resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    applyLayout(false);
+  }, 120);
+});
+
+// close tooltip when tapping empty space (touch devices)
+document.addEventListener('touchstart', (e) => {
+  if(!e.target.closest('.node')){
+    clearHighlight();
+    hideTooltip();
+  }
+}, {passive:true});
+
+// scroll sırasında (özellikle kamera kayarken) eski konumda asılı kalmasın
+window.addEventListener('scroll', () => { hideTooltip(); }, {passive:true});
+scrollHost.addEventListener('scroll', () => { hideTooltip(); }, {passive:true});
+
+// --- Language switch ---
+const langButtons = document.querySelectorAll('.lang-switch button');
+langButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const chosen = btn.dataset.lang;
+    if(chosen === LANG) return;
+    LANG = chosen;
+    langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === LANG));
+    applyUIText();
+    hideTooltip(); // open tooltip (if any) was in the old language; just close it
+  });
+});
+
+// Apply initial (English) UI text on load
+applyUIText();
+</script>
+</body>
+</html>
